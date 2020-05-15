@@ -1,50 +1,49 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Language, Species, Subspecies, ChallengeRatingXP, Country, CountryZone, Place, CulturalItem
-User = get_user_model()
+from .models import Continent, Country, Region, Place, Race, SubRace, Tribe
 
-class UserSerializer(serializers.ModelSerializer):
+class ContinentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ('id', 'username', 'email')
+        model = Continent
+        fields = ('id', 'name', 'description')
 
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'continent', 'description')
 
-class CountryZoneSerializer(serializers.ModelSerializer):
+class RegionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CountryZone
-        fields = ('id', 'name', 'country', 'predominant_climate')
+        model = Region
+        fields = ('id', 'name', 'country', 'description')
 
 class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
-        fields = ('id', 'name', 'zone', 'type_of_place', 'commentary')
+        fields = ('id', 'name', 'region', 'description')
 
-class LanguageSerializer(serializers.ModelSerializer):
+class RaceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Language
-        fields = ('id', 'name', 'script')
+        model = Race
+        fields = ('id', 'name', 'description')
 
-class SpeciesSerializer(serializers.ModelSerializer):
+class SubRaceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Species
-        fields = ('id', 'name')
+        model = SubRace
+        fields = ('id', 'name', 'race', 'description')
 
-class SubspeciesSerializer(serializers.ModelSerializer):
-    species = SpeciesSerializer()
+class TribeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Subspecies
-        fields = ('id', 'species', 'name', 'primary_language', 'subspecies_zone')
+        model = Tribe
+        fields = ('id', 'name', 'subrace', 'country', 'description')
 
-class CulturalItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CulturalItem
-        fields = ('id', 'name', 'country_zone', 'cultural_item_zone', 'type_of_thing', 'commentary')
 
-class ChallengeRatingXPSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ChallengeRatingXP
-        fields = ('id', 'challenge', 'xp')
+# ---- POPULATED SERIALIZERS : to allow single calls to return related data
+# There is a better way to do this, I just don't know what it is yet
+class PopulatedCountrySerializer(CountrySerializer):
+    continent = ContinentSerializer()
+
+class PopulatedRegionSerializer(RegionSerializer):
+    country = PopulatedCountrySerializer()
+
+class PopulatedPlaceSerializer(PlaceSerializer):
+    region = PopulatedRegionSerializer()
